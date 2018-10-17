@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import axios from "axios";
+import { CircularProgress, Snackbar } from '@material-ui/core';
 import { AdvancedTable, Filter } from "./components";
 
 const file = JSON.parse(JSON.stringify({
@@ -92,9 +94,28 @@ const file = JSON.parse(JSON.stringify({
 class App extends Component {
   state = {
     search: "",
-    initialItems: file.items,
-    items: file.items
+    initialItems: [],
+    items: [],
+    loading: true,
+    error: ""
   };
+  
+  async componentDidMount(){
+    try{
+      const { data } = await axios.get("127.0.0.1:8080/GetMapping");
+      this.setState({
+        loading: false,
+        initialItems: data.items,
+        items: data.items
+      })
+    }catch (e) {
+      console.error(e.message);
+      this.setState({
+        loading: false,
+        error: e.message
+      })
+    }
+  }
   
   handleSearchChanged = e => {
     const { value } = e.target;
@@ -107,13 +128,25 @@ class App extends Component {
     return itemValues.some(val => typeof val === "string" && val.includes(value));
   });
   
+  handleClose = () => {
+    this.setState({error: ""})
+  }
+  
   render() {
-    const { search, items } = this.state;
-    return (
-      <>
-        <Filter value={search} onSearchChanged={this.handleSearchChanged} />
-        <AdvancedTable items={items} />
-      </>
+    const { search, items, loading, error } = this.state;
+    return loading ?
+      <CircularProgress/> :
+      (
+        <>
+          <Filter value={search} onSearchChanged={this.handleSearchChanged} />
+          <AdvancedTable items={items} />
+          <Snackbar
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            open={!!error}
+            onClose={this.handleClose}
+            message={<span id="message-id">{error || "Произошла ошибка. Попробуйте перезагрузить страницу"}</span>}
+          />
+        </>
       )
   }
 }
