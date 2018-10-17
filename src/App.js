@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { AdvancedTable } from "./components/AdvancedTable";
+import { AdvancedTable, Filter } from "./components";
 
-const file = JSON.stringify({
+const file = JSON.parse(JSON.stringify({
     "pages": 184,
     "arguments": null,
     "clusters": null,
@@ -87,13 +87,34 @@ const file = JSON.stringify({
             }
         }
     ]
-});
+}));
 
 class App extends Component {
-
+  state = {
+    search: "",
+    initialItems: file.items,
+    items: file.items
+  };
+  
+  handleSearchChanged = e => {
+    const { value } = e.target;
+    const { items, initialItems } = this.state;
+    this.setState({search: value, items: value ? this.filterItems(value, items) : initialItems})
+  };
+  
+  filterItems = (value, items) => items.filter(item => {
+    const itemValues = Object.values(item);
+    return itemValues.some(val => typeof val === "string" && val.includes(value));
+  });
+  
   render() {
-    const { items } = JSON.parse(file);
-    return <AdvancedTable items={items}/>
+    const { search, items } = this.state;
+    return (
+      <>
+        <Filter value={search} onSearchChanged={this.handleSearchChanged} />
+        <AdvancedTable items={items} />
+      </>
+      )
   }
 }
 
