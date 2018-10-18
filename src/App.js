@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import styled from "styled-components";
 import { CircularProgress, Snackbar } from '@material-ui/core';
 import { AdvancedTable, Filter, Table2 } from "./components";
 
@@ -165,11 +164,11 @@ class App extends Component {
   
   async componentDidMount(){
     try{
-      const { data } = await axios.get("https://api.hh.ru/vacancies?area=43&specialization=1&per_page=1");
+      const { data } = await axios.get("127.0.0.1:8080/GetMapping");
       this.setState({
+        loading: false,
         initialItems: data.items,
-        items: data.items,
-        loading: false
+        items: data.items
       })
     }catch (e) {
       console.error(e.message);
@@ -210,9 +209,6 @@ class App extends Component {
   };
   
   render() {
-    const { search, items, loading, error } = this.state;
-    return loading ?
-      <ProgressContainer><CustomCircularProgress/></ProgressContainer> :
     const { search, items, loading, error, items2, loading2, error2 } = this.state;
     return loading || loading2 ?
       <CircularProgress/> :
@@ -231,16 +227,5 @@ class App extends Component {
       )
   }
 }
-//styled
-
-const CustomCircularProgress = styled(CircularProgress)`
-  margin: auto;
-`;
-
-const ProgressContainer = styled.div`
-  width: 100%;
-  height: 95vh;
-  display: flex;
-`;
 
 export default App;
