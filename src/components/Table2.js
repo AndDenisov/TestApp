@@ -31,9 +31,9 @@ export const Table2 = ({ items }) => {
                 <CustomTableCell>{item.contact || ""}</CustomTableCell>
                 <CustomTableCell>
                   {
-                    item.phone.map((phone, index) => (
+                    item.phone.map((number, index) => (
                       <span key={index}>
-                        phone
+                        {number}
                       </span>)
                     )
                   }
