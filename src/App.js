@@ -1,7 +1,65 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import { CircularProgress, Snackbar } from '@material-ui/core';
-import { AdvancedTable, Filter } from "./components";
+import { AdvancedTable, Filter, Table2 } from "./components";
+
+const backItems = JSON.parse(`[
+  {
+    "name": "Системный администратор",
+    "salaryFrom": null,
+    "salaryTo": null,
+    "employer": "ГЕРМЕС",
+    "contact": "Азаров Алексей Константинович",
+    "description": "Обеспечение бесперебойной работы оборудования. Закупка комплектующих и расходников. Поддержка ЛВС, IP-телефонии, обслуживание оргтехники, работа с компьютерами под управлением ОС...",
+    "phone": [
+      "79914119447"
+    ]
+  },
+  {
+    "name": "Специалист call-центра",
+    "salaryFrom": null,
+    "salaryTo": null,
+    "employer": "DocDoc.ru",
+    "contact": "Подолина Татьяна ",
+    "description": "Прием входящих звонков/исходящие звонки по заявкам с сайта. Помощь клиенту в подборе мед. клиники или врача из существующей базы. ",
+    "phone": [
+      "79100460303"
+    ]
+  },
+  {
+    "name": "Консультант контактного центра",
+    "salaryFrom": null,
+    "salaryTo": null,
+    "employer": "Билайн",
+    "contact": "Болог Дарья Юрьевна",
+    "description": "Помогать нашим корпоративным клиентам в обслуживании их бизнеса. Отвечать на вопросы клиентов по телефону, e-mail и в личном кабинете.",
+    "phone": [
+      "79612976050"
+    ]
+  },
+  {
+    "name": "Сетевой инженер",
+    "salaryFrom": null,
+    "salaryTo": null,
+    "employer": "АЛЬФАСАТКОМ",
+    "contact": "Мартынов Александр ",
+    "description": "Поддержка сети передачи данных. Поддержка компьютерной сети компании.",
+    "phone": [
+      "79166985055"
+    ]
+  },
+  {
+    "name": "Специалист отдела по обслуживанию физических лиц",
+    "salaryFrom": null,
+    "salaryTo": null,
+    "employer": "Билайн",
+    "contact": "Болог Дарья Юрьевна",
+    "description": "Отвечать на вопросы клиентов по работе сервисов компании (домашний интернет и цифровое ТВ). Помогать клиенту подобрать самые удобные продукты и...",
+    "phone": [
+      "79612976050"
+    ]
+  }
+]`);
 
 const file = JSON.parse(JSON.stringify({
     "pages": 184,
@@ -95,9 +153,13 @@ class App extends Component {
   state = {
     search: "",
     initialItems: [],
+    initialItems2: [],
     items: [],
+    items2: [],
+    loading2: true,
     loading: true,
-    error: ""
+    error: "",
+    error2: ""
   };
   
   async componentDidMount(){
@@ -115,12 +177,26 @@ class App extends Component {
         error: e.message
       })
     }
+    try{
+      const { data } = await axios.get("http://localhost:8080/fromdb")
+      this.setState({
+        loading2: false,
+        initialItems2: data.items,
+        items2: data.items
+      })
+    }catch (e) {
+      console.error(e.message);
+      this.setState({
+        loading2: false,
+        error2: e.message
+      })
+    }
   }
   
   handleSearchChanged = e => {
     const { value } = e.target;
-    const { items, initialItems } = this.state;
-    this.setState({search: value, items: value ? this.filterItems(value, items) : initialItems})
+    const { items, initialItems, items2, initialItems2 } = this.state;
+    this.setState({search: value, items: value ? this.filterItems(value, items) : initialItems, items2: value ? this.filterItems(value, items2) : initialItems2})
   };
   
   filterItems = (value, items) => items.filter(item => {
@@ -130,19 +206,20 @@ class App extends Component {
   
   handleClose = () => {
     this.setState({error: ""})
-  }
+  };
   
   render() {
-    const { search, items, loading, error } = this.state;
-    return loading ?
+    const { search, items, loading, error, items2, loading2, error2 } = this.state;
+    return loading || loading2 ?
       <CircularProgress/> :
       (
         <>
           <Filter value={search} onSearchChanged={this.handleSearchChanged} />
           <AdvancedTable items={items} />
+          <Table2 items={items2} />
           <Snackbar
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            open={!!error}
+            open={!!error || !!error2}
             onClose={this.handleClose}
             message={<span id="message-id">{error || "Произошла ошибка. Попробуйте перезагрузить страницу"}</span>}
           />
